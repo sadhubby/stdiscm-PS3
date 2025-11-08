@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package streaming;
+
+option csharp_namespace = "stdiscm_PS3";
+
+// For uploading
+service VideoUploadService {
+  rpc UploadVideo(stream VideoUploadRequest) returns (VideoUploadResponse);
+}
+
+message VideoUploadRequest {
+  oneof request {
+    VideoMetadata metadata = 1;
+    bytes chunk = 2;
+  }
+}
+
+message VideoMetadata {
+  string file_name = 1;
+  // string file_type = .mp4;
+}
+
+message VideoUploadResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// For streaming
+
+service VideoLibraryService {
+  rpc ListVideos(ListVideosRequest) returns (ListVideosResponse);
+}
+
+message ListVideosRequest {}
+
+message VideoInfo {
+  string video_id = 1;
+  string file_name = 2;
+  int64 size_in_bytes = 3;
+  string playback_url = 4;
+}
+
+message ListVideosResponse { repeated VideoInfo videos = 1; }
