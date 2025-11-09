@@ -18,7 +18,11 @@ message VideoUploadRequest {
 
 message VideoMetadata {
   string file_name = 1;
-  // string file_type = .mp4;
+  string file_type = 2;
+  int64 file_size_bytes = 3;
+  string upload_id = 4;
+  string checksum_sha256 = 5;
+  int64 timestamp = 6;
 }
 
 message VideoUploadResponse {
@@ -41,4 +45,6 @@ message VideoInfo {
   string playback_url = 4;
 }
 
-message ListVideosResponse { repeated VideoInfo videos = 1; }
+message ListVideosResponse {
+  repeated VideoInfo videos = 1;
+}
