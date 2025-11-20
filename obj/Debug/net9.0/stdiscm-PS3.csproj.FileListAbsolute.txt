@@ -74,3 +74,6 @@
 /home/moonberry/Documents/GitHub/stdiscm-PS3/obj/Debug/net9.0/stdiscm-.02D955ED.Up2Date
 /home/moonberry/Documents/GitHub/stdiscm-PS3/obj/Debug/net9.0/stdiscm-PS3.genruntimeconfig.cache
 /home/moonberry/Documents/GitHub/stdiscm-PS3/obj/Debug/net9.0/ref/stdiscm-PS3.dll
+D:\Users\user\Downloads\STDISCM_P3\stdiscm-PS3\obj\Debug\net9.0\stdiscm-PS3.dll
+D:\Users\user\Downloads\STDISCM_P3\stdiscm-PS3\obj\Debug\net9.0\refint\stdiscm-PS3.dll
+D:\Users\user\Downloads\STDISCM_P3\stdiscm-PS3\obj\Debug\net9.0\stdiscm-PS3.pdb

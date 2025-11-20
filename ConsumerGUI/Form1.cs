@@ -28,8 +28,7 @@ public partial class Form1 : Form
     private void LoadMockVideos()
     {
         videos.Add(new VideoItem(
-            "RivalsAhh.mp4",
-            @"C:\Users\Nitro 5\Videos\MarvelRivals\Highlights\RivalsAhh.mp4"
+            "RivalsAhh.mp4", @"C:\Users\Nitro 5\Videos\MarvelRivals\Highlights\RivalsAhh.mp4" 
         ));
     }
 
