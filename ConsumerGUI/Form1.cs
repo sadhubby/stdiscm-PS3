@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace ConsumerGUI
@@ -21,12 +22,17 @@ namespace ConsumerGUI
 
         private void LoadMockVideos()
         {
-            videos.Add(new VideoItem("RivalsAhh.mp4",
-                @"C:\Users\Nitro 5\Videos\MarvelRivals\Highlights\RivalsAhh.mp4"));
+            string uploadsPath = Path.GetFullPath(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Consumer\Uploads")
+            );
 
-            videos.Add(new VideoItem("Giganto Knull.mkv",
-                @"C:\Users\Nitro 5\Videos\Giganto Knull.mkv"));
+            videos.Add(new VideoItem("RivalsAhh.mp4", Path.Combine(uploadsPath, "RivalsAhh.mp4")));
+            videos.Add(new VideoItem("Taboo Gameplay 1.mp4", Path.Combine(uploadsPath, "Taboo Gameplay 1.mp4")));
+            videos.Add(new VideoItem("Taboo Gameplay 3.mp4", Path.Combine(uploadsPath, "Taboo Gameplay 3.mp4")));
+            videos.Add(new VideoItem("Taboo Gameplay 4.mp4", Path.Combine(uploadsPath, "Taboo Gameplay 4.mp4")));
+            videos.Add(new VideoItem("Taboo Gameplay Furnace.mp4", Path.Combine(uploadsPath, "Taboo Gameplay Furnace.mp4")));
         }
+
 
         private void RenderThumbnails()
         {
