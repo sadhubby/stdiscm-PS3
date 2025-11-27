@@ -11,6 +11,7 @@ namespace ConsumerGUI
         private Timer previewTimer;
         private PictureBox currentPreviewBox;
 
+
         public Form1()
         {
             InitializeComponent();
@@ -28,8 +29,8 @@ namespace ConsumerGUI
 
         private void LoadMockVideos()
         {
-            videos.Add(new VideoItem("RivalsAhh.mp4",
-                "C:\\Users\\Nitro 5\\Videos\\MarvelRivals\\Highlights\\RivalsAhh.mp4"));
+            videos.Add(new VideoItem("RivalsAhh.mp4", "C:\\Users\\Nitro 5\\Videos\\MarvelRivals\\Highlights\\RivalsAhh.mp4"));
+            videos.Add(new VideoItem("Giganto Knull.mkv", "C:\\Users\\Nitro 5\\Videos\\Giganto Knull.mkv"));
         }
 
         private void RenderThumbnails()
