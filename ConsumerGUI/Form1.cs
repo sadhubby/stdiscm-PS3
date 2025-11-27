@@ -8,29 +8,24 @@ namespace ConsumerGUI
     public partial class Form1 : Form
     {
         private List<VideoItem> videos = new List<VideoItem>();
-        private Timer previewTimer;
         private PictureBox currentPreviewBox;
-
+        private AxWMPLib.AxWindowsMediaPlayer hoverPlayer;
 
         public Form1()
         {
             InitializeComponent();
+            InitHoverPlayer();
             LoadMockVideos();
             RenderThumbnails();
-            SetupPreviewTimer();
-        }
-
-        private void SetupPreviewTimer()
-        {
-            previewTimer = new Timer();
-            previewTimer.Interval = 500; // fake preview animation
-            previewTimer.Tick += PreviewTimerTick;
         }
 
         private void LoadMockVideos()
         {
-            videos.Add(new VideoItem("RivalsAhh.mp4", "C:\\Users\\Nitro 5\\Videos\\MarvelRivals\\Highlights\\RivalsAhh.mp4"));
-            videos.Add(new VideoItem("Giganto Knull.mkv", "C:\\Users\\Nitro 5\\Videos\\Giganto Knull.mkv"));
+            videos.Add(new VideoItem("RivalsAhh.mp4",
+                @"C:\Users\Nitro 5\Videos\MarvelRivals\Highlights\RivalsAhh.mp4"));
+
+            videos.Add(new VideoItem("Giganto Knull.mkv",
+                @"C:\Users\Nitro 5\Videos\Giganto Knull.mkv"));
         }
 
         private void RenderThumbnails()
@@ -39,15 +34,20 @@ namespace ConsumerGUI
 
             foreach (var vid in videos)
             {
+                var thumbnail = VideoThumbnailer.GetThumbnail(vid.FilePath);
+
                 PictureBox pb = new PictureBox
                 {
                     Width = 200,
                     Height = 120,
                     SizeMode = PictureBoxSizeMode.StretchImage,
                     BorderStyle = BorderStyle.FixedSingle,
-                    Image = Properties.Resources.default_thumb,
+                    Image = thumbnail,
                     Tag = vid
                 };
+
+                // store original image!
+                pb.Tag = new ThumbnailInfo(vid.FilePath, thumbnail);
 
                 pb.MouseHover += ThumbnailMouseHover;
                 pb.MouseLeave += ThumbnailMouseLeave;
@@ -59,39 +59,61 @@ namespace ConsumerGUI
 
         private void ThumbnailMouseHover(object sender, EventArgs e)
         {
-            currentPreviewBox = sender as PictureBox;
-            currentPreviewBox.BorderStyle = BorderStyle.Fixed3D;
-            previewTimer.Start();
+            var pb = (PictureBox)sender;
+            var info = (ThumbnailInfo)pb.Tag;
+
+            currentPreviewBox = pb;
+
+            hoverPlayer.URL = info.Path;
+            hoverPlayer.Ctlcontrols.currentPosition = 0;
+            hoverPlayer.Ctlcontrols.play();
+
+            hoverPlayer.Bounds = pb.Bounds;
+            hoverPlayer.Parent = pb.Parent;
+            hoverPlayer.BringToFront();
+            hoverPlayer.Visible = true;
         }
 
         private void ThumbnailMouseLeave(object sender, EventArgs e)
         {
-            previewTimer.Stop();
-            var pb = sender as PictureBox;
-            pb.BorderStyle = BorderStyle.FixedSingle;
-            pb.Image = Properties.Resources.default_thumb;
-        }
+            var pb = (PictureBox)sender;
+            var info = (ThumbnailInfo)pb.Tag;
 
-        private int previewFrame = 0;
+            hoverPlayer.Ctlcontrols.stop();
+            hoverPlayer.Visible = false;
 
-        private void PreviewTimerTick(object sender, EventArgs e)
-        {
-            if (currentPreviewBox == null) return;
-
-            previewFrame++;
-
-            // Fake animation
-            currentPreviewBox.BackColor =
-                (previewFrame % 2 == 0) ? Color.LightGray : Color.White;
+            // restore original thumbnail
+            pb.Image = info.Thumbnail;
         }
 
         private void ThumbnailClick(object sender, EventArgs e)
         {
-            var pb = sender as PictureBox;
-            var video = (VideoItem)pb.Tag;
+            var pb = (PictureBox)sender;
+            var info = (ThumbnailInfo)pb.Tag;
 
-            
-            VideoPlayer.URL = video.FilePath;
+            VideoPlayer.URL = info.Path;
+        }
+
+        private void InitHoverPlayer()
+        {
+            hoverPlayer = new AxWMPLib.AxWindowsMediaPlayer();
+            hoverPlayer.CreateControl();     // IMPORTANT LINE!
+            hoverPlayer.uiMode = "none";
+            hoverPlayer.Visible = false;
+            hoverPlayer.settings.mute = true;
+
+            this.Controls.Add(hoverPlayer);
+        }
+
+        private class ThumbnailInfo
+        {
+            public string Path { get; }
+            public Image Thumbnail { get; }
+            public ThumbnailInfo(string path, Image thumb)
+            {
+                Path = path;
+                Thumbnail = thumb;
+            }
         }
     }
 }

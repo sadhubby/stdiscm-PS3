@@ -1,23 +1,35 @@
-﻿using AxWMPLib;
+﻿using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 
-public static class VideoThumbnailer
+namespace ConsumerGUI
 {
-    public static Image GetThumbnail(string path, AxWindowsMediaPlayer player)
+    public static class VideoThumbnailer
     {
-        try
+        public static Image GetThumbnail(string videoPath)
         {
-            player.URL = path;
-            player.Ctlcontrols.currentPosition = 1; // 1 second mark
+            //string ffmpeg = @"C:\ffmpeg\bin\ffmpeg.exe";   // <-- UPDATE PATH
+            string ffmpeg = @"D:\Users\user\Downloads\ffmpeg-8.0.1-essentials_build\ffmpeg-8.0.1-essentials_build\bin\ffmpeg.exe";   // <-- UPDATE PATH
+            string tempFile = Path.GetTempFileName() + ".jpg";
 
-            Bitmap bmp = new Bitmap(player.Width, player.Height);
-            player.DrawToBitmap(bmp, player.ClientRectangle);
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = ffmpeg,
+                Arguments = $"-i \"{videoPath}\" -ss 00:00:01 -vframes 1 \"{tempFile}\"",
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
 
-            return bmp;
-        }
-        catch
-        {
-            return ConsumerGUI.Properties.Resources.default_thumb;
+            using (var process = Process.Start(startInfo))
+            {
+                process.WaitForExit();
+            }
+
+            Image thumbnail = Image.FromFile(tempFile);
+            return thumbnail;
         }
     }
 }
