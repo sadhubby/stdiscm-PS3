@@ -38,9 +38,9 @@ message VideoUploadResponse {
 
 // For streaming
 
-service VideoLibraryService {
-  rpc ListVideos(ListVideosRequest) returns (ListVideosResponse);
-}
+//service VideoLibraryService {
+//  rpc ListVideos(ListVideosRequest) returns (ListVideosResponse);
+//}
 
 message ListVideosRequest {}
 
@@ -54,4 +54,19 @@ message VideoInfo {
 
 message ListVideosResponse {
   repeated VideoInfo videos = 1;
+}
+
+service ConfigurationService {
+  rpc SetConcurrencyLimits (ConfigLimitsRequest) returns (ConfigLimitsResponse);
+}
+
+message ConfigLimitsRequest {
+  // These variables hold the values read from the Producer's config.txt
+  int32 max_consumer_threads = 1; // Corresponds to input 'c'
+  int32 max_queue_length = 2;     // Corresponds to input 'q'
+}
+
+message ConfigLimitsResponse {
+  bool success = 1;
+  string message = 2;
 }
