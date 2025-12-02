@@ -121,6 +121,8 @@ namespace ConsumerGUI
 
         private void ThumbnailClick(object sender, EventArgs e)
         {
+            StopPreview(); //ADDED 12-3-2025
+
             var pb = (PictureBox)sender;
             var info = (ThumbnailInfo)pb.Tag;
 
@@ -135,6 +137,18 @@ namespace ConsumerGUI
             hoverPlayer.Visible = false;
             hoverPlayer.settings.mute = true;
             this.Controls.Add(hoverPlayer);
+
+            //ADDED 12-3-2025
+            hoverPlayer.ClickEvent += (s, e) =>
+            {
+                if (currentPreviewBox != null)
+                {
+                    var info = (ThumbnailInfo)currentPreviewBox.Tag;
+                    StopPreview();
+                    VideoPlayer.URL = info.Path;
+                }
+            };
+
         }
 
         private void InitPreviewTimer()
