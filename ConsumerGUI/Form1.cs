@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using Grpc.Core;
+using StreamingProtos;
 
 namespace ConsumerGUI
 {
@@ -13,18 +15,30 @@ namespace ConsumerGUI
         private AxWMPLib.AxWindowsMediaPlayer hoverPlayer;
         private Timer previewTimer;
 
+        private Channel _channl;
+        private VideoLibraryService.VideoLibraryServiceClient _libraryClient;
+        private readonly string _serverAddress = "localhost:5000";
+        private Timer _refreshTimer;
         public Form1()
         {
             InitializeComponent();
             InitHoverPlayer();
             InitPreviewTimer();
-            LoadMockVideos();
+            InitGrpcClient();
+            InitRefreshTimer();
+            RefreshVideoList();
+            // LoadMockVideos();
             RenderThumbnails();
         }
 
-       
+       private void InitGrpcClient()
+       {
+            _channel = new Channel(_serverAddress, ChannelCredentials.Insecure); 
+            _libraryClient = new VideoLibraryService.VideoLibraryServiceClient(_channel);
+        }
         private void LoadMockVideos()
         {
+
             /*@TODO 
             * Load videos in the video player. 
             * 
@@ -36,6 +50,10 @@ namespace ConsumerGUI
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Consumer\Uploads")
             );
 
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
             videos.Add(new VideoItem("RivalsAhh.mp4", Path.Combine(uploadsPath, "RivalsAhh.mp4")));
             videos.Add(new VideoItem("Taboo Gameplay 1.mp4", Path.Combine(uploadsPath, "Taboo Gameplay 1.mp4")));
             videos.Add(new VideoItem("Taboo Gameplay 3.mp4", Path.Combine(uploadsPath, "Taboo Gameplay 3.mp4")));
@@ -154,6 +172,58 @@ namespace ConsumerGUI
             previewTimer.Tick += PreviewTimerTick;
         }
 
+        private void InitRefreshTimer()
+        {
+            _refreshTimer = new Timer
+            {
+                Interval = 5000 // Refresh every 5 seconds (5000 ms)
+            };
+            _refreshTimer.Tick += RefreshTimer_Tick;
+            _refreshTimer.Start();
+        }
+
+        private async void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            await RefreshVideoList();
+        }
+
+        private async Task RefreshVideoList()
+        {
+            try
+            {
+                // 1. Call the gRPC service
+                var request = new ListVideosRequest();
+                var response = await _libraryClient.ListVideosAsync(request);
+                
+                // 2. Check if the video list has changed (simple comparison by count)
+                if (response.Videos.Count > videos.Count)
+                {
+                    // 3. Update the local list and trigger a UI refresh
+                    
+                    // Clear the existing list
+                    videos.Clear(); 
+
+                    // Convert gRPC VideoInfo objects to local VideoItem objects
+                    foreach (var videoInfo in response.Videos)
+                    {
+                        // Note: FilePath should point to the actual saved file on the Consumer VM
+                        // You might need to adjust how the consumer service provides the actual physical path
+                        // or rely on the PlaybackUrl if it's meant to stream back from the same host.
+                        videos.Add(new VideoItem(
+                            videoInfo.FileName, 
+                            videoInfo.PlaybackUrl // Using PlaybackUrl as the source for the WMP control
+                        ));
+                    }
+                    
+                    RenderThumbnails();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle connection errors (e.g., server is offline)
+                Console.WriteLine($"Error fetching video list: {ex.Message}");
+            }
+        }
         private class ThumbnailInfo
         {
             public string Path { get; }
