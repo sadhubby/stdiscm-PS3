@@ -15,7 +15,7 @@ namespace ConsumerGUI
 
         // Path to uploads
         private readonly string uploadsPath =
-            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\uploads"));
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\uploads"));
 
 
         public Form1()

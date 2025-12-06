@@ -13,7 +13,7 @@ namespace ConsumerGUI
             // Build ffmpeg path relative to the solution (portable)
             string ffmpeg = Path.Combine(
                 Application.StartupPath,
-                @"C:\Users\Evan\Downloads\ffmpeg-8.0.1-essentials_build\ffmpeg-8.0.1-essentials_build\bin\ffmpeg.exe"
+                @"..\..\..\..\Shared\ffmpeg\ffmpeg-8.0.1-essentials_build\bin\ffmpeg.exe"
             );
 
             ffmpeg = Path.GetFullPath(ffmpeg);
