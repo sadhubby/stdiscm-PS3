@@ -227,9 +227,9 @@ namespace ProducerApp
                         return true;
                     }
 
-                    var msg = response?.Message ?? string.Empty;
+                    var msg = response?.Message ?? "Server did not provide a failure message.";
                     Console.WriteLine($"Upload response: success={response?.Success}, message={msg}");
-                    if (msg != null && msg.IndexOf("full", StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (msg.IndexOf("full", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         var backoff = TimeSpan.FromSeconds(Math.Pow(2, attempt));
                         Console.WriteLine($"Queue full, retrying after {backoff.TotalSeconds}s (attempt {attempt}/{maxRetries})");
@@ -240,17 +240,39 @@ namespace ProducerApp
                     Console.WriteLine($"Upload failed: {msg}");
                     return false;
                 }
-                catch (RpcException rex) when (rex.StatusCode == StatusCode.ResourceExhausted || rex.StatusCode == StatusCode.Unavailable)
+                catch (RpcException rex)
                 {
-                    var backoff = TimeSpan.FromSeconds(Math.Pow(2, attempt));
-                    Console.WriteLine($"RPC indicates resource/exhausted/unavailable. Backing off {backoff.TotalSeconds}s (attempt {attempt}/{maxRetries})");
-                    await Task.Delay(backoff, token);
-                    continue;
+                    // 1. Handle retriable statuses (ResourceExhausted/Unavailable) with backoff logic
+                    if (rex.StatusCode == Grpc.Core.StatusCode.ResourceExhausted || rex.StatusCode == Grpc.Core.StatusCode.Unavailable)
+                    {
+                        var backoff = TimeSpan.FromSeconds(Math.Pow(2, attempt));
+                        Console.WriteLine($"RPC indicates resource/exhausted/unavailable. Backing off {backoff.TotalSeconds}s (attempt {attempt}/{maxRetries})");
+                        await Task.Delay(backoff, token);
+                        continue;
+                    }
+                    
+                    // 2. Handle explicit cancellation
+                    if (rex.StatusCode == Grpc.Core.StatusCode.Cancelled)
+                    {
+                        Console.WriteLine($"Upload cancelled via RPC exception.");
+                        break;
+                    }
+
+                    // 3. For all other RPC failures (including the spurious "Status OK" that resulted in an exception), 
+                    // stop retrying and log the full status code.
+                    Console.WriteLine($"Upload exception: Status(StatusCode=\"{rex.StatusCode}\", Detail=\"{rex.Status.Detail}\")");
+                    return false;
                 }
-                catch (OperationCanceledException) { break; }
+                catch (OperationCanceledException) 
+                { 
+                    // Handle user cancellation (Ctrl+C)
+                    Console.WriteLine("Upload cancelled by token.");
+                    break; 
+                }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Upload exception: {ex.Message}");
+                    // Catch unexpected runtime errors
+                    Console.WriteLine($"Upload exception (unexpected): {ex.Message}");
                     return false;
                 }
             }
