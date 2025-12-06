@@ -46,7 +46,16 @@ builder.Services.AddSingleton(jobCompletionMap);
 builder.Services.AddSingleton(uploadFolder);
 builder.Services.AddSingleton(httpBaseUrl);
 
-builder.Services.AddSingleton<VideoUploadServiceImpl>();
+builder.Services.AddSingleton<VideoUploadServiceImpl>(sp => {
+    return new VideoUploadServiceImpl(
+        sp.GetRequiredService<ILogger<VideoUploadServiceImpl>>(),
+        sp.GetRequiredService<SemaphoreSlim>(),
+        sp.GetRequiredService<Channel<UploadJob>>(),
+        sp.GetRequiredService<ConcurrentDictionary<string, TaskCompletionSource<(bool, string, string)>>>(),
+        uploadFolder, // Explicitly pass the correct variable here
+        httpBaseUrl   // Explicitly pass the correct variable here
+    );
+});
 builder.Services.AddSingleton<VideoLibraryServiceImpl>();
 
 var app = builder.Build();
