@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("stdiscm-PS3")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+96ce46ac69fe2731003b185e7dbd4025c5351242")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+06611966ad44ab057467623c4fe17049ef973259")]
 [assembly: System.Reflection.AssemblyProductAttribute("stdiscm-PS3")]
 [assembly: System.Reflection.AssemblyTitleAttribute("stdiscm-PS3")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
